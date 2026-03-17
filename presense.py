@@ -97,24 +97,37 @@ class ModbusUI:
         self.baud_entry.set('9600')
         self.baud_entry.grid(row=1, column=1, pady=(5, 12), padx=5)
 
+
+        # Modbus address spinboxes for each sensor
+        self.sensor1_addr = tk.Spinbox(container, from_=1, to=247, width=4, font=('Segoe UI', 10), justify='center')
+        self.sensor1_addr.grid(row=2, column=0, sticky='w', pady=8, padx=(0,4))
+        self.sensor1_addr.delete(0, 'end')
+        self.sensor1_addr.insert(0, '1')
+
         self.sensor1_label = ttk.Label(container, text="Sensor 1: ---", style='Header.TLabel')
-        self.sensor1_label.grid(row=2, column=0, columnspan=2, pady=8, sticky='w')
+        self.sensor1_label.grid(row=2, column=1, pady=8, sticky='w')
+
+        self.sensor2_addr = tk.Spinbox(container, from_=1, to=247, width=4, font=('Segoe UI', 10), justify='center')
+        self.sensor2_addr.grid(row=3, column=0, sticky='w', pady=3, padx=(0,4))
+        self.sensor2_addr.delete(0, 'end')
+        self.sensor2_addr.insert(0, '2')
 
         self.sensor2_label = ttk.Label(container, text="Sensor 2: ---", style='Header.TLabel')
-        self.sensor2_label.grid(row=3, column=0, columnspan=2, pady=3, sticky='w')
+        self.sensor2_label.grid(row=3, column=1, pady=3, sticky='w')
 
         self.status_label = ttk.Label(container, text="Status: Ready")
-        self.status_label.grid(row=4, column=0, columnspan=2, pady=5)
+        self.status_label.grid(row=4, column=0, columnspan=2, pady=5, sticky='w')
 
-        self.indicator_label = ttk.Label(container, text="● Idle", foreground='gray')
-        self.indicator_label.grid(row=5, column=0, columnspan=2, pady=5)
+        # Status indicator: colored dot only, top right
+        self.indicator_label = ttk.Label(container, text="●", foreground='gray', font=('Segoe UI', 16))
+        self.indicator_label.grid(row=0, column=3, rowspan=2, sticky='ne', padx=(8,0), pady=(0,0))
 
         self.read_button = ttk.Button(container, text="Read Once", command=self.read_once)
         self.read_button.grid(row=6, column=0, columnspan=2, pady=8, sticky='ew')
 
         ttk.Label(container, text="Interval (s):").grid(row=7, column=0, sticky='w', pady=5)
         self.interval_entry = ttk.Entry(container, width=18)
-        self.interval_entry.insert(0, "5")
+        self.interval_entry.insert(0, "2")
         self.interval_entry.grid(row=7, column=1, pady=5, padx=5)
 
         self.repeat_button = ttk.Button(container, text="Repeat Read", command=self.start_repeat)
@@ -143,14 +156,15 @@ class ModbusUI:
         self.status_label.config(text=text)
 
     def set_indicator(self, state):
+        # Only show colored dot, no text
         if state == 'idle':
-            self.indicator_label.config(text='● Idle', foreground='gray')
+            self.indicator_label.config(foreground='gray')
         elif state == 'ongoing':
-            self.indicator_label.config(text='● Ongoing', foreground='orange')
+            self.indicator_label.config(foreground='orange')
         elif state == 'success':
-            self.indicator_label.config(text='● Success', foreground='green')
+            self.indicator_label.config(foreground='green')
         elif state == 'error':
-            self.indicator_label.config(text='● Error', foreground='red')
+            self.indicator_label.config(foreground='red')
 
     def connect_toggle(self):
         if self.serial_conn and self.serial_conn.is_open:
@@ -187,6 +201,8 @@ class ModbusUI:
         self.com_entry.config(state=state)
         self.baud_entry.config(state=state)
         self.refresh_button.config(state=state)
+        self.sensor1_addr.config(state=state)
+        self.sensor2_addr.config(state=state)
 
     def disconnect(self):
         if self.serial_conn and self.serial_conn.is_open:
@@ -225,16 +241,30 @@ class ModbusUI:
             self.set_indicator('error')
             return
 
+        # Lock address spinboxes during read
+        self.sensor1_addr.config(state='disabled')
+        self.sensor2_addr.config(state='disabled')
+
         self.set_status("Status: Reading...")
         self.set_indicator('ongoing')
 
         read_ser = self.serial_conn if self.serial_conn and self.serial_conn.is_open else None
 
         try:
-            val1 = decode_pressure(port, baud, 1, ser=read_ser)
+            addr1 = int(self.sensor1_addr.get())
+            addr2 = int(self.sensor2_addr.get())
+        except Exception:
+            self.set_status("Status: Invalid address")
+            self.set_indicator('error')
+            self.sensor1_addr.config(state='normal')
+            self.sensor2_addr.config(state='normal')
+            return
+
+        try:
+            val1 = decode_pressure(port, baud, addr1, ser=read_ser)
             self.sensor1_label.config(text=f"Sensor 1: {val1}")
 
-            val2 = decode_pressure(port, baud, 2, ser=read_ser)
+            val2 = decode_pressure(port, baud, addr2, ser=read_ser)
             self.sensor2_label.config(text=f"Sensor 2: {val2}")
 
             self.set_status("Status: Read success")
@@ -245,6 +275,10 @@ class ModbusUI:
             self.set_status(f"Status: Error - {e}")
             self.set_indicator('error')
             messagebox.showerror("Read error", str(e))
+        finally:
+            # Unlock address spinboxes after read
+            self.sensor1_addr.config(state='normal')
+            self.sensor2_addr.config(state='normal')
 
     def start_repeat(self):
         if self.running:
@@ -253,6 +287,8 @@ class ModbusUI:
         self.repeat_button.config(state='disabled')
         self.stop_button.config(state='normal')
         self.interval_entry.config(state='disabled')
+        self.sensor1_addr.config(state='disabled')
+        self.sensor2_addr.config(state='disabled')
         self.set_status("Status: Repeating")
         self.set_indicator('ongoing')
         threading.Thread(target=self.repeat_loop, daemon=True).start()
@@ -262,6 +298,8 @@ class ModbusUI:
         self.repeat_button.config(state='normal')
         self.stop_button.config(state='disabled')
         self.interval_entry.config(state='normal')
+        self.sensor1_addr.config(state='normal')
+        self.sensor2_addr.config(state='normal')
         self.set_status("Status: Stopped")
         self.set_indicator('idle')
 
