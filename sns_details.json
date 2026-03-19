@@ -1,0 +1,90 @@
+[
+  {
+    "name": "RS-WZ1-N01 Temperature & Vibration Transmitter",
+    "short_name": "Vbr Sns",
+    "slave_id": 1,
+    "registers": [
+      {"name": "Temperature", "address": "0x0000", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "°C"},
+      {"name": "Speed", "address": "0x0001", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "mm/s"},
+      {"name": "Displacement", "address": "0x0002", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "µm"},
+      {"name": "Acceleration", "address": "0x0003", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "m/s²"}
+    ],
+    "baudrate": 4800,
+    "parity": "N",
+    "stopbits": 1,
+    "special": "Values are uploaded multiplied by 10; divide by 10 for real readings."
+  },
+  {
+    "name": "RS-WZ3-N01 Temperature & 3-Axis Vibration Transmitter",
+    "short_name": "Vbr Sns 3x",
+    "slave_id": 1,
+    "registers": [
+      {"name": "Temperature", "address": "0x0000", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "°C"},
+      {"name": "X-axis Speed", "address": "0x0001", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "mm/s"},
+      {"name": "Y-axis Speed", "address": "0x0002", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "mm/s"},
+      {"name": "Z-axis Speed", "address": "0x0003", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "mm/s"},
+      {"name": "X-axis Displacement", "address": "0x0004", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "µm"},
+      {"name": "Y-axis Displacement", "address": "0x0005", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "µm"},
+      {"name": "Z-axis Displacement", "address": "0x0006", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "µm"},
+      {"name": "X-axis Acceleration", "address": "0x000A", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "m/s²"},
+      {"name": "Y-axis Acceleration", "address": "0x000B", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "m/s²"},
+      {"name": "Z-axis Acceleration", "address": "0x000C", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "m/s²"}
+    ],
+    "baudrate": 4800,
+    "parity": "N",
+    "stopbits": 1,
+    "special": "All values scaled ×10; divide by 10 for actual readings."
+  },
+  {
+    "name": "Pressure/Level Transmitter",
+    "short_name": "Pressure Sns",
+    "slave_id": 1,
+    "registers": [
+      {"name": "Pressure/Level Value", "address": "0x0004", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "kPa/cm"},
+      {"name": "Baudrate Setting", "address": "0x0001", "type": "holding", "format": "int16", "unit": "code"},
+      {"name": "Unit Selection", "address": "0x0002", "type": "holding", "format": "int16", "unit": "code"},
+      {"name": "Decimal Point", "address": "0x0003", "type": "holding", "format": "int16", "unit": "digits"},
+      {"name": "Floating Point Value", "address": "0x0016", "type": "holding", "format": "float32", "unit": "kPa/cm"}
+    ],
+    "baudrate": 9600,
+    "parity": "N/O/E",
+    "stopbits": 1,
+    "special": "Supports both integer (scaled by decimal point) and IEEE754 float outputs."
+  },
+  {
+    "name": "CHT-SHT30-485 Temperature & Humidity Sensor",
+    "short_name": "T/Rh Sns",
+    "slave_id": 1,
+    "registers": [
+      {"name": "Humidity", "address": "0x0000", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "%RH"},
+      {"name": "Temperature", "address": "0x0001", "type": "holding", "format": "int16", "scaling": 0.1, "unit": "°C"}
+    ],
+    "baudrate": 4800,
+    "parity": "N",
+    "stopbits": 1,
+    "special": "Negative temperatures are represented in two’s complement."
+  },
+  {
+    "name": "Mod_temp_unit",
+    "short_name": "Mod_temp Sns",
+    "slave_id": 1,
+    "slave_id_range": "1–32",
+    "registers": [
+      {"name": "uid", "address": "0x0000", "type": "holding", "format": "uint32", "size_bytes": 4, "note": "Unique ID, spans 2 registers"},
+      {"name": "hwvn", "address": "0x0002", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Hardware version"},
+      {"name": "fwvn", "address": "0x0003", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Firmware version"},
+      {"name": "opsc", "address": "0x0004", "type": "holding", "format": "uint32", "size_bytes": 4, "note": "Operation code"},
+      {"name": "status", "address": "0x0006", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Device status"},
+      {"name": "vbus", "address": "0x0007", "type": "holding", "format": "uint16", "size_bytes": 2, "unit": "V", "note": "Bus voltage"},
+      {"name": "ch1_status", "address": "0x0008", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Channel 1 status"},
+      {"name": "ch1_value", "address": "0x0009", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Channel 1 value"},
+      {"name": "ch2_status", "address": "0x000A", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Channel 2 status"},
+      {"name": "ch2_value", "address": "0x000B", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Channel 2 value"},
+      {"name": "p1_value", "address": "0x000C", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Parameter 1"},
+      {"name": "p2_value", "address": "0x000D", "type": "holding", "format": "uint16", "size_bytes": 2, "note": "Parameter 2"}
+    ],
+    "baudrate": 19200,
+    "parity": "N/O/E",
+    "stopbits": 1
+  }
+]
